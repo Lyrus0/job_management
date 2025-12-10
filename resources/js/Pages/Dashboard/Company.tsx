@@ -1,10 +1,29 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { PageProps, Company, Application, Offer } from '@/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Briefcase, Users, FileText, Clock, Plus, ArrowRight } from 'lucide-react';
+import {
+    GlassCard,
+    GlassCardContent,
+    GlassCardHeader,
+    GlassCardTitle,
+    GlassCardDescription
+} from '@/components/ui/glass-card';
+import {
+    Briefcase,
+    Users,
+    FileText,
+    Clock,
+    Plus,
+    ArrowRight,
+    Building2,
+    CheckCircle,
+    Eye
+} from 'lucide-react';
+import GradientText from '@/components/animations/GradientText';
+import CountUp from '@/components/animations/CountUp';
+import FadeContent from '@/components/animations/FadeContent';
 
 interface Props extends PageProps {
     company: Company;
@@ -21,11 +40,23 @@ interface Props extends PageProps {
 const statusBadge = (status: string) => {
     switch (status) {
         case 'pending':
-            return <Badge variant="warning"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
+            return (
+                <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                    <Clock className="w-3 h-3 mr-1" /> Pending
+                </Badge>
+            );
         case 'accepted':
-            return <Badge variant="success">Accepted</Badge>;
+            return (
+                <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
+                    <CheckCircle className="w-3 h-3 mr-1" /> Accepted
+                </Badge>
+            );
         case 'rejected':
-            return <Badge variant="destructive">Rejected</Badge>;
+            return (
+                <Badge className="bg-red-500/10 text-red-400 border-red-500/20">
+                    Rejected
+                </Badge>
+            );
         default:
             return <Badge>{status}</Badge>;
     }
@@ -34,13 +65,13 @@ const statusBadge = (status: string) => {
 const offerStatusBadge = (status: string) => {
     switch (status) {
         case 'draft':
-            return <Badge variant="secondary">Draft</Badge>;
+            return <Badge className="bg-white/10 text-white/60 border-white/20">Draft</Badge>;
         case 'active':
-            return <Badge variant="success">Active</Badge>;
+            return <Badge className="bg-green-500/10 text-green-400 border-green-500/20">Active</Badge>;
         case 'expired':
-            return <Badge variant="warning">Expired</Badge>;
+            return <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">Expired</Badge>;
         case 'closed':
-            return <Badge variant="destructive">Closed</Badge>;
+            return <Badge className="bg-red-500/10 text-red-400 border-red-500/20">Closed</Badge>;
         default:
             return <Badge>{status}</Badge>;
     }
@@ -50,13 +81,22 @@ export default function CompanyDashboard({ auth, company, stats, recentApplicati
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        {company.company_name} Dashboard
-                    </h2>
-                    <Link href={route('offers.create')}>
-                        <Button>
-                            <Plus className="w-4 h-4 mr-2" /> Post New Offer
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
+                            <Building2 className="w-4 h-4 text-purple-400" />
+                            <span className="text-sm text-white/70">Company</span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-bold">
+                            <GradientText colors={['#a78bfa', '#f472b6', '#a78bfa']} className="inline">
+                                {company.company_name}
+                            </GradientText>
+                        </h2>
+                    </div>
+                    <Link href={route('company.offers.create')}>
+                        <Button className="bg-white text-black hover:bg-white/90 rounded-full px-6 group">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Post New Offer
                         </Button>
                     </Link>
                 </div>
@@ -64,126 +104,163 @@ export default function CompanyDashboard({ auth, company, stats, recentApplicati
         >
             <Head title="Company Dashboard" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4 mb-8">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Total Offers</CardTitle>
-                                <Briefcase className="w-4 h-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.total_offers}</div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Active Offers</CardTitle>
-                                <Briefcase className="w-4 h-4 text-green-500" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.active_offers}</div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-                                <FileText className="w-4 h-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.total_applications}</div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-                                <Clock className="w-4 h-4 text-yellow-500" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.pending_applications}</div>
-                            </CardContent>
-                        </Card>
-                    </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <FadeContent delay={0} blur>
+                    <GlassCard hover className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                                <Briefcase className="w-5 h-5 text-purple-400" />
+                            </div>
+                        </div>
+                        <div className="text-3xl font-bold text-white mb-1">
+                            <CountUp to={stats.total_offers} duration={2} />
+                        </div>
+                        <p className="text-sm text-white/50">Total Offers</p>
+                    </GlassCard>
+                </FadeContent>
 
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {/* Recent Applications */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Recent Applications</CardTitle>
-                                <CardDescription>Latest candidates for your offers</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {recentApplications.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {recentApplications.map((application) => (
-                                            <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                                <div>
-                                                    <h4 className="font-medium">
-                                                        {application.student?.user?.name} {application.student?.user?.surname}
-                                                    </h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Applied for: {application.offer?.title}
-                                                    </p>
-                                                </div>
-                                                {statusBadge(application.status)}
+                <FadeContent delay={0.1} blur>
+                    <GlassCard hover className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-2 rounded-xl bg-green-500/10 border border-green-500/20">
+                                <CheckCircle className="w-5 h-5 text-green-400" />
+                            </div>
+                        </div>
+                        <div className="text-3xl font-bold text-white mb-1">
+                            <CountUp to={stats.active_offers} duration={2} />
+                        </div>
+                        <p className="text-sm text-white/50">Active Offers</p>
+                    </GlassCard>
+                </FadeContent>
+
+                <FadeContent delay={0.2} blur>
+                    <GlassCard hover className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                <FileText className="w-5 h-5 text-blue-400" />
+                            </div>
+                        </div>
+                        <div className="text-3xl font-bold text-white mb-1">
+                            <CountUp to={stats.total_applications} duration={2} />
+                        </div>
+                        <p className="text-sm text-white/50">Total Applications</p>
+                    </GlassCard>
+                </FadeContent>
+
+                <FadeContent delay={0.3} blur>
+                    <GlassCard hover className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-2 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                                <Clock className="w-5 h-5 text-yellow-400" />
+                            </div>
+                        </div>
+                        <div className="text-3xl font-bold text-white mb-1">
+                            <CountUp to={stats.pending_applications} duration={2} />
+                        </div>
+                        <p className="text-sm text-white/50">Pending Review</p>
+                    </GlassCard>
+                </FadeContent>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent Applications */}
+                <FadeContent delay={0.4} blur>
+                    <GlassCard>
+                        <GlassCardHeader>
+                            <GlassCardTitle>Recent Applications</GlassCardTitle>
+                            <GlassCardDescription>Latest candidates for your offers</GlassCardDescription>
+                        </GlassCardHeader>
+                        <GlassCardContent>
+                            {recentApplications.length > 0 ? (
+                                <div className="space-y-3">
+                                    {recentApplications.map((application) => (
+                                        <div
+                                            key={application.id}
+                                            className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-colors"
+                                        >
+                                            <div>
+                                                <h4 className="font-medium text-white">
+                                                    {application.student?.user?.name} {application.student?.user?.surname}
+                                                </h4>
+                                                <p className="text-sm text-white/50 mt-1">
+                                                    Applied for: {application.offer?.title}
+                                                </p>
                                             </div>
-                                        ))}
+                                            {statusBadge(application.status)}
+                                        </div>
+                                    ))}
+                                    <Link href={route('company.applications')}>
+                                        <Button className="w-full mt-4 bg-white/10 hover:bg-white/20 text-white border-0 rounded-xl group">
+                                            View All Applications
+                                            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mb-4">
+                                        <Users className="w-8 h-8 text-white/30" />
                                     </div>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                                        <p className="text-muted-foreground">No applications yet</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    <p className="text-white/50">No applications yet</p>
+                                </div>
+                            )}
+                        </GlassCardContent>
+                    </GlassCard>
+                </FadeContent>
 
-                        {/* Your Offers */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Your Offers</CardTitle>
-                                <CardDescription>Manage your job postings</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {offers.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {offers.map((offer) => (
-                                            <Link key={offer.id} href={route('offers.show', offer.id)}>
-                                                <div className="p-4 border rounded-lg hover:bg-accent transition-colors cursor-pointer">
-                                                    <div className="flex items-start justify-between">
-                                                        <div>
-                                                            <h4 className="font-medium">{offer.title}</h4>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {offer.applications?.length || 0} applications
-                                                            </p>
-                                                        </div>
-                                                        {offerStatusBadge(offer.status)}
+                {/* Your Offers */}
+                <FadeContent delay={0.5} blur>
+                    <GlassCard>
+                        <GlassCardHeader>
+                            <GlassCardTitle>Your Offers</GlassCardTitle>
+                            <GlassCardDescription>Manage your job postings</GlassCardDescription>
+                        </GlassCardHeader>
+                        <GlassCardContent>
+                            {offers.length > 0 ? (
+                                <div className="space-y-3">
+                                    {offers.map((offer) => (
+                                        <Link key={offer.id} href={route('offers.show', offer.id)}>
+                                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:border-white/20 transition-all cursor-pointer group">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <h4 className="font-medium text-white group-hover:text-purple-400 transition-colors">
+                                                            {offer.title}
+                                                        </h4>
+                                                        <p className="text-sm text-white/50 flex items-center gap-1 mt-1">
+                                                            <Eye className="w-3 h-3" />
+                                                            {offer.applications?.length || 0} applications
+                                                        </p>
                                                     </div>
+                                                    {offerStatusBadge(offer.status)}
                                                 </div>
-                                            </Link>
-                                        ))}
-                                        <Link href={route('offers.index')}>
-                                            <Button variant="outline" className="w-full">
-                                                View All Offers <ArrowRight className="w-4 h-4 ml-2" />
-                                            </Button>
+                                            </div>
                                         </Link>
+                                    ))}
+                                    <Link href={route('company.offers.index')}>
+                                        <Button className="w-full mt-4 bg-white/10 hover:bg-white/20 text-white border-0 rounded-xl group">
+                                            View All Offers
+                                            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mb-4">
+                                        <Briefcase className="w-8 h-8 text-white/30" />
                                     </div>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                                        <p className="text-muted-foreground">No offers created yet</p>
-                                        <Link href={route('offers.create')}>
-                                            <Button className="mt-4">
-                                                <Plus className="w-4 h-4 mr-2" /> Create Your First Offer
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                                    <p className="text-white/50 mb-4">No offers created yet</p>
+                                    <Link href={route('company.offers.create')}>
+                                        <Button className="bg-white text-black hover:bg-white/90 rounded-full px-6">
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Create Your First Offer
+                                        </Button>
+                                    </Link>
+                                </div>
+                            )}
+                        </GlassCardContent>
+                    </GlassCard>
+                </FadeContent>
             </div>
         </AuthenticatedLayout>
     );

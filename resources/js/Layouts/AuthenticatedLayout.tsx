@@ -1,179 +1,278 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import {
+    Briefcase,
+    LayoutDashboard,
+    FileText,
+    Users,
+    Building2,
+    Settings,
+    LogOut,
+    Menu,
+    X,
+    ChevronDown,
+    User,
+    Bell
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import FadeContent from '@/components/animations/FadeContent';
+import Aurora from '@/components/animations/Aurora';
+
+interface NavItem {
+    name: string;
+    href: string;
+    icon: React.ElementType;
+    current: boolean;
+}
 
 export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    const { auth } = usePage().props as any;
+    const user = auth.user;
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+
+    // Navigation items based on user role
+    const getNavItems = (): NavItem[] => {
+        const baseItems: NavItem[] = [
+            {
+                name: 'Dashboard',
+                href: route('dashboard'),
+                icon: LayoutDashboard,
+                current: route().current('dashboard')
+            },
+        ];
+
+        if (user.role === 'student') {
+            return [
+                ...baseItems,
+                {
+                    name: 'Browse Offers',
+                    href: route('offers.index'),
+                    icon: Briefcase,
+                    current: route().current('offers.*')
+                },
+                {
+                    name: 'My Applications',
+                    href: route('student.applications'),
+                    icon: FileText,
+                    current: route().current('student.applications')
+                },
+                {
+                    name: 'My Profile',
+                    href: route('student.profile'),
+                    icon: User,
+                    current: route().current('student.profile')
+                },
+            ];
+        }
+
+        if (user.role === 'company') {
+            return [
+                ...baseItems,
+                {
+                    name: 'My Offers',
+                    href: route('company.offers.index'),
+                    icon: Briefcase,
+                    current: route().current('company.offers.*')
+                },
+                {
+                    name: 'Applications',
+                    href: route('company.applications'),
+                    icon: FileText,
+                    current: route().current('company.applications')
+                },
+                {
+                    name: 'Company Profile',
+                    href: route('company.profile'),
+                    icon: Building2,
+                    current: route().current('company.profile')
+                },
+            ];
+        }
+
+        if (user.role === 'admin') {
+            return [
+                ...baseItems,
+                {
+                    name: 'Users',
+                    href: route('admin.users.index'),
+                    icon: Users,
+                    current: route().current('admin.users.*')
+                },
+                {
+                    name: 'All Offers',
+                    href: route('admin.offers.index'),
+                    icon: Briefcase,
+                    current: route().current('admin.offers.*')
+                },
+            ];
+        }
+
+        return baseItems;
+    };
+
+    const navItems = getNavItems();
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
+        <div className="min-h-screen bg-black text-white">
+            {/* Background Aurora Effect */}
+            <div className="fixed inset-0 pointer-events-none">
+                <Aurora
+                    colorStops={['#3b82f6', '#8b5cf6', '#ec4899']}
+                    className="opacity-20"
+                />
+            </div>
+
+            {/* Navigation */}
+            <nav className="fixed top-0 left-0 right-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl px-6 py-3">
+                        <div className="flex justify-between items-center">
+                            {/* Logo */}
+                            <Link href="/" className="flex items-center group">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+                                    <div className="relative bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-xl">
+                                        <Briefcase className="h-5 w-5 text-white" />
+                                    </div>
+                                </div>
+                                <span className="ml-3 text-lg font-semibold tracking-tight hidden sm:block">JobConnect</span>
+                            </Link>
+
+                            {/* Desktop Navigation */}
+                            <div className="hidden md:flex items-center gap-1">
+                                {navItems.map((item) => (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                                            item.current
+                                                ? 'bg-white/10 text-white'
+                                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                                        }`}
+                                    >
+                                        <item.icon className="w-4 h-4" />
+                                        {item.name}
+                                    </Link>
+                                ))}
                             </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
+                            {/* Right side */}
+                            <div className="flex items-center gap-3">
+                                {/* Notifications */}
+                                <button className="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-colors">
+                                    <Bell className="w-5 h-5" />
+                                </button>
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
+                                {/* User Menu */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowUserMenu(!showUserMenu)}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <span className="hidden sm:block text-sm font-medium">{user.name}</span>
+                                        <ChevronDown className="w-4 h-4" />
+                                    </button>
 
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
+                                    {/* Dropdown */}
+                                    {showUserMenu && (
+                                        <div className="absolute right-0 mt-2 w-56 backdrop-blur-xl bg-black/80 border border-white/10 rounded-xl overflow-hidden shadow-2xl">
+                                            <div className="px-4 py-3 border-b border-white/10">
+                                                <p className="text-sm font-medium text-white">{user.name}</p>
+                                                <p className="text-xs text-white/50">{user.email}</p>
+                                            </div>
+                                            <div className="py-1">
+                                                <Link
+                                                    href={route('profile.edit')}
+                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
                                                 >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
+                                                    <Settings className="w-4 h-4" />
+                                                    Settings
+                                                </Link>
+                                                <Link
+                                                    href={route('logout')}
+                                                    method="post"
+                                                    as="button"
+                                                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors"
+                                                >
+                                                    <LogOut className="w-4 h-4" />
+                                                    Log Out
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
+                                {/* Mobile menu button */}
+                                <button
+                                    onClick={() => setShowingNavigationDropdown(!showingNavigationDropdown)}
+                                    className="md:hidden p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-colors"
                                 >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
-                >
-                    <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
+                                    {showingNavigationDropdown ? (
+                                        <X className="w-6 h-6" />
+                                    ) : (
+                                        <Menu className="w-6 h-6" />
+                                    )}
+                                </button>
                             </div>
                         </div>
 
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
+                        {/* Mobile Navigation */}
+                        {showingNavigationDropdown && (
+                            <div className="md:hidden mt-4 pt-4 border-t border-white/10">
+                                <div className="space-y-1">
+                                    {navItems.map((item) => (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                item.current
+                                                    ? 'bg-white/10 text-white'
+                                                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                                            }`}
+                                        >
+                                            <item.icon className="w-5 h-5" />
+                                            {item.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </nav>
 
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {header}
-                    </div>
-                </header>
-            )}
+            {/* Main Content */}
+            <main className="relative pt-24 pb-12 min-h-screen">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Page Header */}
+                    {header && (
+                        <FadeContent blur className="mb-8">
+                            {header}
+                        </FadeContent>
+                    )}
 
-            <main>{children}</main>
+                    {/* Page Content */}
+                    <FadeContent delay={0.1} blur>
+                        {children}
+                    </FadeContent>
+                </div>
+            </main>
+
+            {/* Click outside to close user menu */}
+            {showUserMenu && (
+                <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowUserMenu(false)}
+                />
+            )}
         </div>
     );
 }
