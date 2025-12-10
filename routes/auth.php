@@ -9,7 +9,28 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\WorkOSController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| WorkOS SSO Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->group(function () {
+    // WorkOS AuthKit redirect
+    Route::get('auth/workos', [WorkOSController::class, 'redirect'])
+        ->name('workos.redirect');
+
+    // WorkOS callback
+    Route::get('auth/callback', [WorkOSController::class, 'callback'])
+        ->name('workos.callback');
+
+    // SSO with specific provider (Google, Microsoft, GitHub)
+    Route::get('auth/sso/{provider}', [WorkOSController::class, 'sso'])
+        ->name('workos.sso');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
